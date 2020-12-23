@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: auth-mongo1
+  labels:
+    app: auth-mongo1
+spec:
+  replicas: 1
+  serviceName: 'auth-mongo1'
+  selector:
+    matchLabels:
+      app: auth-mongo1
+  template:
+    metadata:
+      labels:
+        app: auth-mongo1
+    spec:
+      containers:
+        - name: auth-mongo1
+          image: mongo
+          volumeMounts:
+            - name: auth-data1
+              mountPath: '/auth_data'
+  volumeClaimTemplates:
+    - metadata:
+        name: auth-data1
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-mongo1
+spec:
+  selector:
+    app: auth-mongo1
+  ports:
+    - name: db
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
